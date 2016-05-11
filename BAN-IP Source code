@@ -1,0 +1,94 @@
+#!/bin/bash 
+
+
+#variables for some of our color for our text.
+RED=$(tput setaf 1)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+GREEN=$(tput setaf 2)
+RESET=$(tput sgr0)
+
+
+#title of the script
+echo $YELLOW"
+
+    ____     ___     _   __           ____    ____ 
+   / __ )   /   |   / | / /          /  _/   / __  /
+  / __  |  / /| |  /  |/ /           / /    / /_/ /
+ / /_/ /  / ___ | / /|  /          _/ /    / ____/ 
+/_____/  /_/  |_|/_/ |_/          /___/   /_/      
+                                                   
+
+"
+#author and twitter handle (:
+echo $CYAN"                  Created by:$RED Akira Shavers"
+echo $CYAN"		      Version:$RED 1.0			  "
+echo $CYAN"                  Follow me on Twitter: "
+echo $GREEN"                      @Bla5ian07"$RESET
+echo
+
+#creates options for selection
+menu='BAN Delete List Help Quit'
+PS3='Please select an option:'
+
+
+
+#select statement will create a user-friendly interface for its users.
+select ACTION in $menu 
+do
+	if [[ $ACTION == "List" ]]
+	then
+		#list the current banned IP addresses 
+		echo $CYAN"List of Banned IPs: "$RESET
+		#prints the iptables for the INPUT chain
+		echo
+		iptables -L INPUT -v -n | grep DROP
+
+	elif [[ $ACTION == "Delete" ]]; then
+		echo $CYAN"What IP Address rule would you like to delete or unban?"$RESET
+		#read the user input
+		read ipaddress 
+
+		#if no IP address is entered than return to previous directory
+
+		if [ -z "$ipaddress" ]; then
+			echo "Please enter an IP address."
+			break
+		fi
+
+		echo $CYAN"Applying action $RED DELETE $CYAN to $YELLOW" $ipaddress$RESET
+		#delete the IP address has been entered
+		iptables -D INPUT -s $ipaddress -j DROP		
+
+	elif [[ $ACTION == "BAN" ]];then
+		echo $CYAN"What IP address would you like to BAN?"$RESET
+		#read user input
+		read banip
+
+		#if no IP address is entered than return to previous directory
+		if [ -z "$banip" ]; then
+			echo "Please enter an IP address."
+			break
+		fi
+
+		echo $CYAN"Applying action $RED BAN $CYAN to $YELLOW" $banip$RESET
+		#append(ban) the ip address that the user has entered
+		iptables -A INPUT -s $banip -j DROP 
+
+		#if the user needs help, let's help them out! 
+	elif [[ $ACTION == "Help" ]]; then
+
+		echo $CYAN"To select an option enter the number associated with the option."
+		echo $YELLOW"Example: $RESET Please select an option: 1"$CYAN
+		echo
+		echo "This tool works with iptables to ban, unban, or list any IP address that has an active rule."
+		echo "After selecting an option, simply enter the IP address you desire to ban or unban from accessing your network."$RESET
+
+		#Give the user and option to quit! 
+	elif [[ $ACTION == "Quit" ]]; then
+		break
+			#statements	
+	fi
+	#end if
+done	
+#end select
